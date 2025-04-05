@@ -2,7 +2,7 @@ import socket
 import _thread
 import sys
 
-server = ""
+server = "" #add server address here
 port = 5555
 
 #currently set up TCP, but may change
@@ -17,6 +17,7 @@ s.listen(2)
 print("Waiting for a connection, Server Started")
 
 def threaded_client(conn):
+    conn.send(str.encode("Connected to server"))
     reply = ""
     while True:
         try:
