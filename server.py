@@ -34,12 +34,12 @@ def threaded_client(conn, p, gameId):
     reply = ""
     while True:
         try:
-            print("Waiting for data...")
+            #print("Waiting for data...")
             data = conn.recv(4096).decode()
 
             #check if the gameId is valid
             if gameId in games:
-                print("GameId is valid")
+                #print("GameId is valid")
                 game = games[gameId]
 
                 if not data:
@@ -48,26 +48,16 @@ def threaded_client(conn, p, gameId):
                     if data == "reset":
                         game.resetWent()
                     elif data != "get":
-                        game.play(p, data)
+                        try:
+                            x, y = map(int, data.split(","))
+                            game.play(p, x, y)
+                        except Exception as move_error:
+                            print(f"Error processing move from player {p}: {move_error}")
 
                     conn.sendall(pickle.dumps(game))
             else:
                 break
             
-            #check game data and if over
-            if data['type'] == 'paint':
-                x, y = data['x'], data['y']
-                game.paint(x, y, p)
-
-            send_data = {
-                'type': 'state',
-                'grid': game.grid,
-                'current_player': game.current_player,
-                'scores': game.get_scores(),
-                'winner': game.get_winner() if game.is_game_over() else None
-            }
-            conn.sendall(pickle.dumps(send_data))
-
         except:
             break
 

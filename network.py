@@ -1,3 +1,5 @@
+#network for client side
+
 import socket
 import pickle
 import time
@@ -29,6 +31,7 @@ class network:
                 print("No data received from server")
                 return None
             return player_id
+            #return self.client.recv(2048).decode()
         except:
             pass
         
@@ -36,7 +39,13 @@ class network:
         try:
             # Encode the data to UTF-8
             self.client.send(str.encode(data))
-            return pickle.loads(self.client.recv(2048*2))
+            data = self.client.recv(2048*2)
+            #print(f"Data received in send method: {data}")  # Debugging output
+            if not data:
+                print("No data received from server")
+                return None
+            #return pickle.loads(self.client.recv(2048*2))
+            return pickle.loads(data)
         except socket.error as e:
             print(e)
 

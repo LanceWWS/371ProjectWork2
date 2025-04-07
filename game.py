@@ -1,57 +1,88 @@
 #game logic
 
+# game.py
+
 class Game:
     def __init__(self, num_players):
-        # Initialize the game with the number of players
-        self.num_players = num_players
-        self.grid = [[-1 for _ in range(8)] for _ in range(8)]  # 8x8 grid, -1 represents unclaimed squares
-        self.turns = [0 for _ in range(num_players)]  # Track whether each player has made a move
-        self.finished = False  # Flag to track if the game is finished
-        self.current_turn = 0  # Which player's turn it is
-        self.claimed_squares = [0 for _ in range(num_players)]  # Track how many squares each player has claimed
-        self.ready = False  # Tracks if the game is ready to start (e.g., waiting for all players)
+        self.num_players = num_players  
+        # Create an 8x8 grid.
+        # Each cell is a dict with:
+        #   - 'owner': None (if unclaimed) or the player id who claimed it.
+        #   - 'paint': a dict mapping player ids to the amount of paint they've added.
+        self.grid = [
+            [
+                {'owner': None, 'paint': {i: 0 for i in range(num_players)}}
+                for _ in range(8)
+            ]
+            for _ in range(8)
+        ]
+        self.finished = False  # Set to True when all squares are claimed.
+        self.claimed_squares = [0 for _ in range(num_players)]
+        self.threshold = 50  # A square is claimed if a player's paint > 50 units.
 
     def play(self, player_id, x, y):
-        """Handle a move for a player (claim a grid square)."""
-        if self.grid[y][x] == -1:  # If the cell is unclaimed
-            self.grid[y][x] = player_id  # Mark the cell as owned by the player
-            self.claimed_squares[player_id] += 1  # Increase the number of squares the player owns
-            self.turns[player_id] = 1  # Mark that this player has made their move
+        """
+        Process a move from player_id on square (x,y).
+        Instead of instantly claiming the square, the player "paints" it.
+        When a player's accumulated paint exceeds the threshold, the square is claimed.
+        """
+        # Check if coordinates are valid
+        if not (0 <= x < 8 and 0 <= y < 8):
+            print("Invalid coordinates.")
+            return
 
-            # Optional: Check if game is finished (i.e., all cells are filled)
-            if all(cell != -1 for row in self.grid for cell in row):
-                self.finished = True
-                print("Game over! All squares are claimed.")
-            else:
-                self.next_turn()  # Move to the next player after a valid move
-        else:
-            print(f"Cell ({x},{y}) is already claimed!")
+        cell = self.grid[y][x]
+        # If the square is already claimed, ignore further painting.
+        if cell['owner'] is not None:
+            print(f"Square ({x},{y}) is already claimed by player {cell['owner']}.")
+            return
 
-    def next_turn(self):
-        """Move to the next player's turn."""
-        self.current_turn = (self.current_turn + 1) % self.num_players  # Alternate between players
-        print(f"Player {self.current_turn}'s turn!")
+        # Add paint – here each move adds a fixed amount.
+        paint_amount = 10
+        cell['paint'][player_id] += paint_amount
+        print(f"Player {player_id} painted square ({x},{y}). Total for player {player_id}: {cell['paint'][player_id]}")
+
+        # Check if this player's paint now exceeds the threshold.
+        if cell['paint'][player_id] > self.threshold:
+            cell['owner'] = player_id
+            self.claimed_squares[player_id] += 1
+            print(f"Player {player_id} has claimed square ({x},{y})!")
+
+        # Check if all squares are claimed.
+        if all(cell['owner'] is not None for row in self.grid for cell in row):
+            self.finished = True
 
     def resetWent(self):
-        """Reset the 'went' status for all players, for example, at the beginning of a new round."""
-        self.turns = [0 for _ in range(self.num_players)]  # Reset everyone's turn status
-        self.current_turn = 0  # Start with the first player
-        print("Turns have been reset!")
+        """
+        In a painting game, resetting "went" status might not be as critical.
+        If you want to allow rounds of painting without resetting the entire grid,
+        you can implement logic here. For now, we’ll simply print a message.
+        """
+        print("Resetting turns is not required for the painting mechanic.")
 
     def get_winner(self):
-        """Determine who has claimed the most squares and declare the winner."""
+        """
+        Determine the winner when the game is finished.
+        The winner is the player with the most claimed squares.
+        Returns a list of winning player ids (in case of a tie).
+        """
         if self.finished:
             max_claimed = max(self.claimed_squares)
-            winner = self.claimed_squares.index(max_claimed)
-            return winner
-        else:
-            return None  # Game is not finished yet
+            winners = [i for i, count in enumerate(self.claimed_squares) if count == max_claimed]
+            return winners
+        return None
 
     def reset_game(self):
-        """Reset the game to its initial state."""
-        self.grid = [[-1 for _ in range(8)] for _ in range(8)]  # Reset the grid
-        self.turns = [0 for _ in range(self.num_players)]  # Reset turn status
-        self.claimed_squares = [0 for _ in range(self.num_players)]  # Reset claimed squares
-        self.finished = False  # Reset the game finished flag
-        self.current_turn = 0  # Start with the first player
+        """
+        Resets the entire game state, including the grid and claimed counts.
+        """
+        self.grid = [
+            [
+                {'owner': None, 'paint': {i: 0 for i in range(self.num_players)}}
+                for _ in range(8)
+            ]
+            for _ in range(8)
+        ]
+        self.finished = False
+        self.claimed_squares = [0 for _ in range(self.num_players)]
         print("Game has been reset!")

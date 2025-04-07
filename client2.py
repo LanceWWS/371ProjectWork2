@@ -17,11 +17,19 @@ def draw_grid(win, grid):
     win.fill((255, 255, 255))
     for y in range(ROWS):
         for x in range(ROWS):
-            rect = pygame.Rect(x*SQ_SIZE, y*SQ_SIZE, SQ_SIZE, SQ_SIZE)
+            rect = pygame.Rect(x * SQ_SIZE, y * SQ_SIZE, SQ_SIZE, SQ_SIZE)
             pygame.draw.rect(win, (200, 200, 200), rect, 1)
-            if grid[y][x] != -1:
-                pygame.draw.rect(win, colors[grid[y][x] % len(colors)], rect.inflate(-8, -8))
+            
+            cell = grid[y][x]
+            # If a square is claimed, fill it with the owner's color.
+            if cell['owner'] is not None:
+                pygame.draw.rect(win, colors[cell['owner'] % len(colors)], rect.inflate(-8, -8))
+            else:
+                # Optionally, you could visualize partial painting here.
+                # For simplicity, we're not drawing partial paint.
+                pass
     pygame.display.update()
+
 
 def main():
     run = True
