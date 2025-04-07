@@ -38,7 +38,7 @@ class Game:
             return
 
         # Add paint – here each move adds a fixed amount.
-        paint_amount = 10
+        paint_amount = 51
         cell['paint'][player_id] += paint_amount
         print(f"Player {player_id} painted square ({x},{y}). Total for player {player_id}: {cell['paint'][player_id]}")
 

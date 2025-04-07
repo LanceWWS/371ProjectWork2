@@ -27,9 +27,9 @@ print("Waiting for a connection, Server Started")
 
 def threaded_client(conn, p, gameId):
     global idCount
-    print(str.encode(str(p)), "encodeing", str(p))
+    #print(str.encode(str(p)), "encodeing", str(p))
     conn.send(str.encode(str(p)))
-    print(f"Sending player ID {p} to {conn.getpeername()}")
+    #print(f"Sending player ID {p} to {conn.getpeername()}")
 
     reply = ""
     while True:

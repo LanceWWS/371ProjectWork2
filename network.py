@@ -12,7 +12,7 @@ class network:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.addr = (self.server, self.port)
         self.p = self.connect()
-        print(f"Player ID: {self.p}")  # Debug: Print the player ID to check
+        #print(f"Player ID: {self.p}")  # Debug: Print the player ID to check
         if self.p is None:
             print("Error: Failed to receive player ID from the server!")
 
@@ -26,7 +26,7 @@ class network:
             time.sleep(1) 
             data = self.client.recv(2048)
             player_id = int(data.decode())
-            print(f"Player ID received in network: {player_id}")  # Debugging output
+            #print(f"Player ID received in network: {player_id}")  # Debugging output
             if not data:
                 print("No data received from server")
                 return None

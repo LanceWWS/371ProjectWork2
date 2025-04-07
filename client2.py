@@ -1,7 +1,7 @@
 import pygame
 from network import network  # your class
 import pickle
-pygame.font.init()
+
 
 WIDTH = 640
 ROWS = 8
@@ -10,6 +10,7 @@ SQ_SIZE = WIDTH // ROWS
 pygame.init()
 win = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("Multiplayer Grid Claim")
+font = pygame.font.SysFont("comicsans", 40)
 
 colors = [(255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 0)]
 
@@ -30,15 +31,26 @@ def draw_grid(win, grid):
                 pass
     pygame.display.update()
 
+def display_winner(win, winner):
+    win.fill((255, 255, 255))
+    if isinstance(winner, list):
+        win_text = "Winner(s): " + ", ".join(f"Player {w}" for w in winner)
+    else:
+        win_text = f"Winner: Player {winner}"
+    text = font.render(win_text, True, (0, 0, 0))
+    # Center the text
+    text_rect = text.get_rect(center=(WIDTH // 2, WIDTH // 2))
+    win.blit(text, text_rect)
+    pygame.display.update()
 
 def main():
     run = True
     clock = pygame.time.Clock()
     n = network()
-    print("player", n.getP())  # player ID
     p = int(n.getP())  # player ID
     print("You are player", p)
 
+    game_over_displayed = False
     while run:
         clock.tick(30)
         try:
@@ -50,19 +62,29 @@ def main():
         if game:
             draw_grid(win, game.grid)
 
+            # Check if the game is finished
+            if game.finished:
+                winner = game.get_winner()
+                display_winner(win, winner)
+                game_over_displayed = True
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            # Only allow moves if the game isn't finished
+            if not game_over_displayed and event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                x, y = pos[0] // SQ_SIZE, pos[1] // SQ_SIZE
-                move_str = f"{x},{y}"
+                x = pos[0] // SQ_SIZE
+                y = pos[1] // SQ_SIZE
+                move = f"{x},{y}"
+                print("Sending move:", move)
                 try:
-                    game = n.send(move_str)
-                except:
-                    print("Failed to send move")
+                    game = n.send(move)
+                except Exception as e:
+                    print("Error sending move:", e)
+
+        pygame.display.update()
 
     pygame.quit()
-
 main()
