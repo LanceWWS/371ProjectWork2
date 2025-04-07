@@ -27,16 +27,19 @@ print("Waiting for a connection, Server Started")
 
 def threaded_client(conn, p, gameId):
     global idCount
-    print(str.encode(str(p)))
+    print(str.encode(str(p)), "encodeing", str(p))
     conn.send(str.encode(str(p)))
-    print(f"[THREAD] Player {p} joined Game {gameId}")
+    print(f"Sending player ID {p} to {conn.getpeername()}")
+
     reply = ""
     while True:
         try:
+            print("Waiting for data...")
             data = conn.recv(4096).decode()
 
             #check if the gameId is valid
             if gameId in games:
+                print("GameId is valid")
                 game = games[gameId]
 
                 if not data:
@@ -80,11 +83,10 @@ def threaded_client(conn, p, gameId):
 while True:
     conn , addr = s.accept()
     print("Connected to:", addr)
-    
-    idCount += 1
+  
     
     p = idCount % MAX_PLAYERS  # Alternate player IDs, e.g., 0, 1, 2, 3
-
+    idCount += 1
     # Determine which game the player should join
     gameId = idCount // MAX_PLAYERS  # Integer division gives the game ID
 

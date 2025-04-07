@@ -1,42 +1,57 @@
 #game logic
 
-GRID_SIZE = 8
-SQUARE_SIZE = 80
-
 class Game:
     def __init__(self, num_players):
+        # Initialize the game with the number of players
         self.num_players = num_players
-        self.current_player = 0
-        self.grid = [[{'owner': None, 'paint': {i: 0 for i in range(num_players)}} for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+        self.grid = [[-1 for _ in range(8)] for _ in range(8)]  # 8x8 grid, -1 represents unclaimed squares
+        self.turns = [0 for _ in range(num_players)]  # Track whether each player has made a move
+        self.finished = False  # Flag to track if the game is finished
+        self.current_turn = 0  # Which player's turn it is
+        self.claimed_squares = [0 for _ in range(num_players)]  # Track how many squares each player has claimed
+        self.ready = False  # Tracks if the game is ready to start (e.g., waiting for all players)
 
-    def paint(self, x, y, player_id, amount=5):
-        if x < 0 or x >= GRID_SIZE or y < 0 or y >= GRID_SIZE:
-            return
-        cell = self.grid[y][x]
-        if cell['owner'] is not None:
-            return
+    def play(self, player_id, x, y):
+        """Handle a move for a player (claim a grid square)."""
+        if self.grid[y][x] == -1:  # If the cell is unclaimed
+            self.grid[y][x] = player_id  # Mark the cell as owned by the player
+            self.claimed_squares[player_id] += 1  # Increase the number of squares the player owns
+            self.turns[player_id] = 1  # Mark that this player has made their move
 
-        cell['paint'][player_id] += amount
-        total = sum(cell['paint'].values())
+            # Optional: Check if game is finished (i.e., all cells are filled)
+            if all(cell != -1 for row in self.grid for cell in row):
+                self.finished = True
+                print("Game over! All squares are claimed.")
+            else:
+                self.next_turn()  # Move to the next player after a valid move
+        else:
+            print(f"Cell ({x},{y}) is already claimed!")
 
-        if total > (SQUARE_SIZE * SQUARE_SIZE) / 2:
-            if cell['paint'][player_id] > total / 2:
-                cell['owner'] = player_id
-                self.current_player = (self.current_player + 1) % self.num_players
+    def next_turn(self):
+        """Move to the next player's turn."""
+        self.current_turn = (self.current_turn + 1) % self.num_players  # Alternate between players
+        print(f"Player {self.current_turn}'s turn!")
 
-    def get_scores(self):
-        scores = [0] * self.num_players
-        for row in self.grid:
-            for cell in row:
-                if cell['owner'] is not None:
-                    scores[cell['owner']] += 1
-        return scores
-
-    def is_game_over(self):
-        total_claimed = sum(1 for row in self.grid for cell in row if cell['owner'] is not None)
-        return total_claimed == GRID_SIZE * GRID_SIZE
+    def resetWent(self):
+        """Reset the 'went' status for all players, for example, at the beginning of a new round."""
+        self.turns = [0 for _ in range(self.num_players)]  # Reset everyone's turn status
+        self.current_turn = 0  # Start with the first player
+        print("Turns have been reset!")
 
     def get_winner(self):
-        scores = self.get_scores()
-        max_score = max(scores)
-        return [i for i, s in enumerate(scores) if s == max_score]
+        """Determine who has claimed the most squares and declare the winner."""
+        if self.finished:
+            max_claimed = max(self.claimed_squares)
+            winner = self.claimed_squares.index(max_claimed)
+            return winner
+        else:
+            return None  # Game is not finished yet
+
+    def reset_game(self):
+        """Reset the game to its initial state."""
+        self.grid = [[-1 for _ in range(8)] for _ in range(8)]  # Reset the grid
+        self.turns = [0 for _ in range(self.num_players)]  # Reset turn status
+        self.claimed_squares = [0 for _ in range(self.num_players)]  # Reset claimed squares
+        self.finished = False  # Reset the game finished flag
+        self.current_turn = 0  # Start with the first player
+        print("Game has been reset!")

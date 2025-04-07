@@ -1,5 +1,6 @@
 import socket
 import pickle
+import time
 
 class network:
     def __init__(self):
@@ -8,18 +9,26 @@ class network:
         self.port = 5555
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.addr = (self.server, self.port)
-        self.id = self.connect()
-        print(self.id)
+        self.p = self.connect()
+        print(f"Player ID: {self.p}")  # Debug: Print the player ID to check
+        if self.p is None:
+            print("Error: Failed to receive player ID from the server!")
 
     def getP(self):
-        return self.id
+        return self.p
     
     def connect(self):
         try:
-            
             # Connect to the server
             self.client.connect((self.addr))
-            return self.recv(2048).decode()
+            time.sleep(1) 
+            data = self.client.recv(2048)
+            player_id = int(data.decode())
+            print(f"Player ID received in network: {player_id}")  # Debugging output
+            if not data:
+                print("No data received from server")
+                return None
+            return player_id
         except:
             pass
         

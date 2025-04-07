@@ -1,6 +1,7 @@
 import pygame
 from network import network  # your class
 import pickle
+pygame.font.init()
 
 WIDTH = 640
 ROWS = 8
@@ -26,8 +27,9 @@ def main():
     run = True
     clock = pygame.time.Clock()
     n = network()
-    print("player get", n.getP())  # player ID
+    print("player", n.getP())  # player ID
     p = int(n.getP())  # player ID
+    print("You are player", p)
 
     while run:
         clock.tick(30)
