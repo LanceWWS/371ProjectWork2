@@ -12,6 +12,41 @@ pygame.display.set_caption("Multiplayer Grid Claim")
 font = pygame.font.SysFont("comicsans", 40)
 colors = [(255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 255, 0)]
 
+
+def menu_screen():
+    running = True
+    button_color = (100, 200, 100)
+    hover_color = (50, 150, 50)
+    font_big = pygame.font.SysFont("comicsans", 50)
+
+    host_btn = pygame.Rect(WIDTH//4, WIDTH//2 - 60, WIDTH//2, 50)
+    join_btn = pygame.Rect(WIDTH//4, WIDTH//2 + 20, WIDTH//2, 50)
+
+    while running:
+        win.fill((255, 255, 255))
+        mx, my = pygame.mouse.get_pos()
+
+        # Host button
+        pygame.draw.rect(win, hover_color if host_btn.collidepoint(mx, my) else button_color, host_btn)
+        text = font_big.render("Host Game", True, (0, 0, 0))
+        win.blit(text, (host_btn.x + 20, host_btn.y + 5))
+
+        # Join button
+        pygame.draw.rect(win, hover_color if join_btn.collidepoint(mx, my) else button_color, join_btn)
+        text = font_big.render("Join Game", True, (0, 0, 0))
+        win.blit(text, (join_btn.x + 20, join_btn.y + 5))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if host_btn.collidepoint(event.pos):
+                    return "host"
+                elif join_btn.collidepoint(event.pos):
+                    return "join"
+
 def draw_grid(win, grid):
     win.fill((255, 255, 255))
     for y in range(ROWS):
@@ -44,10 +79,15 @@ def display_winner(win, winner):
 def main():
     run = True
     clock = pygame.time.Clock()
-    
+
+    choice = menu_screen()
+    if choice is None:
+        pygame.quit()
+        return
+
     try:
-        n = network()
-        p = int(n.getP())  # player ID
+        n = network(start_server=(choice == "host"))
+        p = int(n.getP())
         print("You are player", p)
     except Exception as e:
         print(f"Failed to connect to server: {e}")

@@ -6,20 +6,20 @@ import subprocess
 import os
 
 class network:
-    def __init__(self):
-        # create server
-        self.server = "127.0.0.1"  # add your server address here
+    def __init__(self, start_server=False):
+        self.server = "127.0.0.1"
         self.port = 55555
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.addr = (self.server, self.port)
         self.server_process = None
-        
-        # Try to connect to existing server
+
         if not self.try_connect():
-            # No server running, start one
-            self.start_server()
-            time.sleep(2)  # Wait for server to initialize
-            self.try_connect()  # Try connecting again
+            if start_server:
+                self.start_server()
+                time.sleep(2)
+                self.try_connect()
+            else:
+                raise ConnectionError("No server found.")
     
     def try_connect(self):
         """Try to connect to server, return True if successful"""

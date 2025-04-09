@@ -55,12 +55,7 @@ def threaded_client(conn, p, gameId):
             print(f"Error in client thread: {e}")
             break
     
-    print("Lost connection")
-    try:
-        del games[gameId]
-        print(f"Closing Game {gameId}")
-    except:
-        pass
+    print(f"Player {p} disconnected from Game {gameId}")
     idCount -= 1
     conn.close()
    
