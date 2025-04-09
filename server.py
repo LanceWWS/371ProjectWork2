@@ -4,7 +4,7 @@ import sys
 import pickle
 from game import Game
 
-server = "127.0.0.1"  # add your server address here
+server = "169.254.205.157"  # add your server address here
 port = 55555
 MAX_PLAYERS = 4
 connected = set()
